@@ -122,3 +122,77 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes float-drift-1 {
+  0% {
+    transform: translate(-10vw, -5vh) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(5vw, 8vh) scale(1.15);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-10vw, -5vh) scale(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes float-drift-2 {
+  0% {
+    transform: translate(8vw, 6vh) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-6vw, -10vh) scale(1.2);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(8vw, 6vh) scale(1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes float-drift-3 {
+  0% {
+    transform: translate(0vw, 10vh) scale(0.95);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(12vw, -6vh) scale(1.15);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(0vw, 10vh) scale(0.95);
+    opacity: 0.5;
+  }
+}
+
+.theatre-glow {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(24px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.theatre-glow--one {
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(190, 24, 24, 0.55), rgba(0, 0, 0, 0));
+  animation: float-drift-1 16s ease-in-out infinite;
+}
+
+.theatre-glow--two {
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(245, 245, 220, 0.45), rgba(0, 0, 0, 0));
+  animation: float-drift-2 18s ease-in-out infinite;
+}
+
+.theatre-glow--three {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(127, 29, 29, 0.5), rgba(0, 0, 0, 0));
+  animation: float-drift-3 22s ease-in-out infinite;
+}
