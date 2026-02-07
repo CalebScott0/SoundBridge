@@ -15,34 +15,18 @@ interface SigninSignupProps {
   onSuccess: (user: AppUser) => void;
 }
 
-export function SigninSignup({ onSuccess }: SigninSignupProps) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const finalizeUser = async (result: UserCredential) => {
-    const fbUser = result.user;
-    const userRef = doc(db, "users", fbUser.uid);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-      onSuccess(userSnap.data() as AppUser);
-    } else {
-      const newUser: AppUser = {
-        uid: fbUser.uid,
-        role: "artist",
-        setupComplete: false,
-        name: fbUser.displayName || "",
-        imageUrl: fbUser.photoURL || "",
-        contact: {
-          email: fbUser.email || "anonymous@dev.com",
-          phone: "",
-          location: "",
-        },
-        socials: { soundcloud: "", spotify: "", youtube: "", apple: "" },
-      };
-      await setDoc(userRef, newUser);
-      onSuccess(newUser);
-    }
-  };
+export function SigninSignup({ onSignin, onSignup }: SigninSignupProps) {
+  return (
+    <div className="mx-auto w-full max-w-xl rounded-3xl border border-red-900/60 bg-black/40 p-8 text-center shadow-lg">
+      <p className="text-xs uppercase tracking-[0.3em] text-amber-200">
+        SoundBridge
+      </p>
+      <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">
+        Welcome back
+      </h1>
+      <p className="mt-2 text-sm text-amber-200/80">
+        Sign in to your account or create a new one.
+      </p>
 
   return (
     <div className="mx-auto w-full max-w-xl space-y-4 rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-lg">
@@ -61,26 +45,15 @@ export function SigninSignup({ onSuccess }: SigninSignupProps) {
       />
       <div className="flex gap-2">
         <Button
-          onClick={async () => {
-            if (!email || !password)
-              return alert("Please enter email and password");
-            finalizeUser(
-              await signInWithEmailAndPassword(auth, email, password),
-            );
-          }}
-          className="flex-1 bg-indigo-500"
+          onClick={onSignin}
+          className="h-12 w-full bg-red-700 text-amber-100 hover:bg-red-600"
         >
           Login
         </Button>
         <Button
-          onClick={async () => {
-            if (!email || !password)
-              return alert("Please enter email and password");
-            finalizeUser(
-              await createUserWithEmailAndPassword(auth, email, password),
-            );
-          }}
-          className="flex-1 border border-indigo-500"
+          onClick={onSignup}
+          variant="outline"
+          className="h-12 w-full border-red-900/60 bg-black/40 text-amber-100 hover:bg-red-900/30"
         >
           Sign Up
         </Button>

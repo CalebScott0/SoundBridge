@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { motion, useAnimation } from "framer-motion";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -29,7 +30,7 @@ function TagBadges({ tags }: TagBadgesProps) {
       {tags.map((tag) => (
         <Badge
           key={tag}
-          className="rounded-full border border-white/20 bg-white/10 text-white"
+          className="rounded-full border border-red-900/40 bg-black/40 text-amber-100"
         >
           {tag}
         </Badge>
@@ -44,16 +45,16 @@ interface DetailsPanelProps {
 
 function DetailsPanel({ profile }: DetailsPanelProps) {
   return (
-    <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-      <p className="text-sm text-zinc-200">{profile.bio}</p>
-      <div className="text-xs text-zinc-300">
+    <div className="space-y-3 rounded-2xl border border-red-900/40 bg-black/40 p-4">
+      <p className="text-sm text-amber-100">{profile.bio}</p>
+      <div className="text-xs text-amber-200/80">
         {profile.contact.location && (
           <p>Location: {profile.contact.location}</p>
         )}
         {profile.contact.email && <p>Email: {profile.contact.email}</p>}
         {profile.contact.phone && <p>Phone: {profile.contact.phone}</p>}
       </div>
-      <div className="text-xs text-zinc-300">
+      <div className="text-xs text-amber-200/80">
         {profile.socials.instagram && (
           <p>Instagram: {profile.socials.instagram}</p>
         )}
@@ -119,6 +120,7 @@ export function ArtistCard({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFullMode, setIsFullMode] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const swipeControls = useAnimation();
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -161,56 +163,98 @@ export function ArtistCard({
     }
   };
 
+  const triggerSwipe = (direction: "left" | "right") => {
+    const x = direction === "left" ? -300 : 300;
+    swipeControls
+      .start({
+        x,
+        y: 0,
+        rotate: direction === "left" ? -12 : 12,
+        opacity: 0,
+        transition: { duration: 0.25 },
+      })
+      .then(() => {
+        handleSwipe(direction);
+        swipeControls.set({ x: 0, y: 0, rotate: 0, opacity: 1 });
+      });
+  };
+
+  const handleDragEnd = (_: unknown, info: { offset: { x: number; y: number } }) => {
+    const { x, y } = info.offset;
+    const threshold = 120;
+
+    if (Math.abs(x) > threshold || Math.abs(y) > threshold) {
+      const direction = x >= 0 ? 1 : -1;
+      swipeControls
+        .start({
+          x: x + direction * 300,
+          y: y,
+          rotate: direction * 12,
+          opacity: 0,
+          transition: { duration: 0.25 },
+        })
+        .then(() => {
+          if (x < 0) {
+            handleSwipe("left");
+          } else {
+            handleSwipe("right");
+          }
+          swipeControls.set({ x: 0, y: 0, rotate: 0, opacity: 1 });
+        });
+    } else {
+      swipeControls.start({
+        x: 0,
+        y: 0,
+        rotate: 0,
+        transition: { type: "spring", stiffness: 280, damping: 20 },
+      });
+    }
+  };
+
   return (
-    <Card
-      className="cursor-pointer border-white/10 bg-zinc-900 text-white"
-      onClick={() => setShowDetails(!showDetails)}
+    <motion.div
+      drag
+      animate={swipeControls}
+      onDragEnd={handleDragEnd}
+      className="touch-pan-y"
     >
-      <CardHeader className="space-y-3">
-        <CardTitle className="text-2xl font-semibold">{profile.name}</CardTitle>
-        <Badge className="text-lg">{profile.role}</Badge>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="overflow-hidden rounded-2xl">
-          <img
-            src={profile.imageUrl}
-            alt={profile.name}
-            className="h-72 w-full object-cover"
+      <Card
+        className="cursor-pointer border-red-900/60 bg-black/50 text-amber-100"
+        onClick={() => setShowDetails((prev) => !prev)}
+        role="button"
+        tabIndex={0}
+      >
+        <CardHeader className="space-y-3">
+          <CardTitle className="text-2xl font-semibold">{profile.name}</CardTitle>
+          <Badge className="border-red-900/60 bg-red-950/40 text-amber-100">
+            {profile.role}
+          </Badge>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          <div className="overflow-hidden rounded-2xl">
+            <img
+              src={profile.imageUrl}
+              alt={profile.name}
+              className="h-72 w-full object-cover"
+            />
+          </div>
+
+          <TagBadges tags={profile.genres} />
+
+          {showDetails && <DetailsPanel profile={profile} />}
+
+          <audio ref={audioRef} src={profile.audioUrl} />
+        </CardContent>
+
+        <CardFooter className="flex flex-col items-start gap-4">
+          <CompatibilityBadge label={profile.compatibility} />
+          <ActionButtons
+            onPass={() => triggerSwipe("left")}
+            onCollab={() => triggerSwipe("right")}
           />
-        </div>
-        <div className="flex w-full gap-2">
-          <Button
-            variant={isPlaying && !isFullMode ? "destructive" : "secondary"}
-            className="h-10 flex-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              togglePlay(false);
-            }}
-          >
-            {isPlaying && !isFullMode ? "Stop Preview" : "Preview (10s)"}
-          </Button>
-          <Button
-            variant={isPlaying && isFullMode ? "destructive" : "default"}
-            className="h-10 flex-1 bg-indigo-600 hover:bg-indigo-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              togglePlay(true);
-            }}
-          >
-            {isPlaying && isFullMode ? "Stop Full" : "Full Clip"}
-          </Button>
-        </div>
-        <TagBadges tags={profile.genres ?? []} />
-        {showDetails && <DetailsPanel profile={profile} />}
-        <audio ref={audioRef} src={profile.audioUrl} />
-      </CardContent>
-      <CardFooter className="flex flex-col gap-4">
-        <CompatibilityBadge label={profile.compatibility} />
-        <ActionButtons
-          onPass={() => onPass?.(profile)}
-          onCollab={() => onCollab?.(profile)}
-        />
-      </CardFooter>
-    </Card>
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
 }
