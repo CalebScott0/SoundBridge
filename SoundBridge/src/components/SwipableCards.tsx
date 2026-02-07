@@ -12,7 +12,7 @@ export function SwipableCards({ currentUser }: { currentUser: AppUser }) {
     const fetchProfiles = async () => {
       try {
         // db collection users
-        const usersRef = collection(db, "Users");
+        const usersRef = collection(db, "users");
         // query profiles with complete setup
         const targetRole =
           currentUser.role === "artist" ? "producer" : "artist";
