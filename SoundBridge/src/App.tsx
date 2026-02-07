@@ -29,7 +29,7 @@ function App() {
       )}
 
       {stage === "auth" && (
-        <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
+        <div className="min-h-svh justify-center bg-gradient-to-br from-black via-red-950 to-stone-950 px-4 py-10 text-amber-100">
           <SigninSignup
             onSignin={() => setStage("login")}
             onSignup={() => setStage("login")}
@@ -38,7 +38,7 @@ function App() {
       )}
 
       {stage === "login" && (
-        <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
+        <div className="min-h-svh justify-center bg-gradient-to-br from-black via-red-950 to-stone-950 px-4 py-10 text-amber-100">
           {step === "first" && (
             <First
               artist={() => {
@@ -66,34 +66,26 @@ function App() {
       )}
 
       {stage === "role" && (
-        <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
+        <div className="min-h-svh justify-center bg-gradient-to-br from-black via-red-950 to-stone-950 px-4 py-10 text-amber-100">
           <RoleSelection onContinue={() => setStage("cards")} />
         </div>
       )}
 
       {stage === "cards" && (
-        <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
+        <div className="min-h-svh justify-center bg-gradient-to-br from-black via-red-950 to-stone-950 px-4 py-10 text-amber-100">
           <div className="mx-auto max-w-6xl space-y-8">
             <SwipableCards />
-            <div className="flex justify-center">
-              <button
-                className="rounded-full bg-indigo-500 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-600"
-                onClick={() => setStage("deck")}
-              >
-                Go to Deck
-              </button>
-            </div>
           </div>
-          <Footer />
+          <Footer onExplore={() => setStage("cards")} onDeck={() => setStage("deck")} />
         </div>
       )}
 
       {stage === "deck" && (
-        <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
+        <div className="min-h-svh justify-center bg-gradient-to-br from-black via-red-950 to-stone-950 px-4 py-10 text-amber-100">
           <div className="mx-auto max-w-6xl">
             <Decks />
           </div>
-          <Footer />
+          <Footer onExplore={() => setStage("cards")} onDeck={() => setStage("deck")} />
         </div>
       )}
     </>

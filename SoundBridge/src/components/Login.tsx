@@ -3,28 +3,28 @@ import { Button } from "@/components/ui/button";
 
 export function First({ artist, producer }) {
   return (
-    <div className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-lg">
-      <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">
+    <div className="mx-auto w-full max-w-xl rounded-3xl border border-red-900/60 bg-black/40 p-8 text-center shadow-lg">
+      <p className="text-xs uppercase tracking-[0.3em] text-amber-200">
         SoundBridge
       </p>
       <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">
         Let’s set up your account
       </h1>
-      <p className="mt-2 text-sm text-slate-300">
+      <p className="mt-2 text-sm text-amber-200/80">
         Which type of account would you like to set up?
       </p>
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <Button
           onClick={artist}
           variant="outline"
-          className="h-12 border-indigo-400/40 bg-white/5 text-indigo-100 hover:bg-indigo-500 hover:text-white"
+          className="h-12 border-red-900/60 bg-black/40 text-amber-100 hover:bg-red-900/40"
         >
           Artist
         </Button>
         <Button
           onClick={producer}
           variant="outline"
-          className="h-12 border-indigo-400/40 bg-white/5 text-indigo-100 hover:bg-indigo-500 hover:text-white"
+          className="h-12 border-red-900/60 bg-black/40 text-amber-100 hover:bg-red-900/40"
         >
           Producer
         </Button>
@@ -46,19 +46,19 @@ export function Second({ name, next }) {
   }, [photoUrl]);
 
   return (
-    <div className="mx-auto w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 shadow-lg">
+    <div className="mx-auto w-full max-w-2xl rounded-3xl border border-red-900/60 bg-black/40 p-8 shadow-lg">
       <h1 className="text-3xl font-semibold">Let’s set up your account</h1>
-      <p className="mt-2 text-sm text-slate-300">
+      <p className="mt-2 text-sm text-amber-200/80">
         Add a photo and tell us a bit about yourself.
       </p>
 
       <div className="mt-6 space-y-6">
-        <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-          <label className="text-xs uppercase tracking-[0.25em] text-indigo-200">
+        <div className="rounded-2xl border border-red-900/40 bg-black/50 p-4">
+          <label className="text-xs uppercase tracking-[0.25em] text-amber-200">
             Profile photo
           </label>
           <div className="mt-4 flex flex-col items-center justify-center gap-4">
-            <div className="h-28 w-28 overflow-hidden rounded-full border border-white/10 bg-slate-900/60">
+            <div className="h-28 w-28 overflow-hidden rounded-full border border-red-900/50 bg-black/60">
               {photoUrl ? (
                 <img
                   src={photoUrl}
@@ -78,7 +78,7 @@ export function Second({ name, next }) {
                 </div>
               )}
             </div>
-            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-sm text-slate-200 hover:bg-white/10">
+            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-red-900/60 bg-black/40 px-6 py-3.5 text-sm text-amber-100 hover:bg-red-900/30">
               <svg
                 viewBox="0 0 24 24"
                 className="h-4 w-4 text-white"
@@ -105,35 +105,35 @@ export function Second({ name, next }) {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <input
-            className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
+            className="w-full rounded-xl border border-red-900/40 bg-black/40 px-4 py-3 text-sm text-amber-100 outline-none focus:border-red-700/70"
             type="text"
             placeholder="First name"
           />
           <input
-            className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
+            className="w-full rounded-xl border border-red-900/40 bg-black/40 px-4 py-3 text-sm text-amber-100 outline-none focus:border-red-700/70"
             type="text"
             placeholder="Last name"
           />
         </div>
 
         <input
-          className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
+          className="w-full rounded-xl border border-red-900/40 bg-black/40 px-4 py-3 text-sm text-amber-100 outline-none focus:border-red-700/70"
           type="text"
           placeholder={`${name}'s name`}
         />
 
         <div>
-          <label className="text-xs uppercase tracking-[0.25em] text-indigo-200">
+          <label className="text-xs uppercase tracking-[0.25em] text-amber-200">
             Date of birth
           </label>
           <input
             type="date"
-            className="mt-3 w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
+            className="mt-3 w-full rounded-xl border border-red-900/40 bg-black/40 px-4 py-3 text-sm text-amber-100 outline-none focus:border-red-700/70"
           />
         </div>
 
         <div>
-          <label className="text-xs uppercase tracking-[0.25em] text-indigo-200">
+          <label className="text-xs uppercase tracking-[0.25em] text-amber-200">
             Gender
           </label>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -142,8 +142,8 @@ export function Second({ name, next }) {
               onClick={() => setSelectedGender("Male")}
               className={
                 selectedGender === "Male"
-                  ? "border-indigo-400/60 bg-indigo-500/30 text-white"
-                  : "border-white/10 bg-white/5 text-white hover:bg-white/10"
+                  ? "border-red-700/70 bg-red-800/40 text-amber-100"
+                  : "border-red-900/40 bg-black/40 text-amber-100 hover:bg-red-900/30"
               }
             >
               Male
@@ -153,8 +153,8 @@ export function Second({ name, next }) {
               onClick={() => setSelectedGender("Female")}
               className={
                 selectedGender === "Female"
-                  ? "border-indigo-400/60 bg-indigo-500/30 text-white"
-                  : "border-white/10 bg-white/5 text-white hover:bg-white/10"
+                  ? "border-red-700/70 bg-red-800/40 text-amber-100"
+                  : "border-red-900/40 bg-black/40 text-amber-100 hover:bg-red-900/30"
               }
             >
               Female
@@ -164,8 +164,8 @@ export function Second({ name, next }) {
               onClick={() => setSelectedGender("Other")}
               className={
                 selectedGender === "Other"
-                  ? "border-indigo-400/60 bg-indigo-500/30 text-white"
-                  : "border-white/10 bg-white/5 text-white hover:bg-white/10"
+                  ? "border-red-700/70 bg-red-800/40 text-amber-100"
+                  : "border-red-900/40 bg-black/40 text-amber-100 hover:bg-red-900/30"
               }
             >
               Other
@@ -175,7 +175,7 @@ export function Second({ name, next }) {
 
         <Button
           onClick={next}
-          className="w-full bg-indigo-500 text-white hover:bg-indigo-600"
+          className="w-full bg-red-700 text-amber-100 hover:bg-red-600"
         >
           Continue
         </Button>
@@ -186,48 +186,48 @@ export function Second({ name, next }) {
 
 export function Third({ next }) {
   return (
-    <div className="mx-auto w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-lg">
+    <div className="mx-auto w-full max-w-2xl rounded-3xl border border-red-900/60 bg-black/40 p-8 text-center shadow-lg">
       <h1 className="text-3xl font-semibold">Let’s showcase your work</h1>
-      <p className="mt-2 text-sm text-slate-300">
+      <p className="mt-2 text-sm text-amber-200/80">
         Upload a short audio clip and add any profile links.
       </p>
 
       <div className="mt-6 space-y-6">
-        <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-left">
-          <label className="text-xs uppercase tracking-[0.25em] text-indigo-200">
+        <div className="rounded-2xl border border-red-900/40 bg-black/50 p-4 text-left">
+          <label className="text-xs uppercase tracking-[0.25em] text-amber-200">
             Audio preview
           </label>
           <input
             type="file"
             accept="audio/*"
-            className="mt-3 w-full text-sm text-slate-300 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-500/20 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-indigo-100 hover:file:bg-indigo-500/40"
+            className="mt-3 w-full text-sm text-amber-200/80 file:mr-4 file:rounded-md file:border-0 file:bg-red-700/40 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-amber-100 hover:file:bg-red-700/60"
           />
         </div>
 
         <div className="space-y-3">
           <input
             type="text"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
+            className="w-full rounded-xl border border-red-900/40 bg-black/40 px-4 py-3 text-sm text-amber-100 outline-none focus:border-red-700/70"
             placeholder="SoundCloud profile link"
           />
           <input
             type="text"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
+            className="w-full rounded-xl border border-red-900/40 bg-black/40 px-4 py-3 text-sm text-amber-100 outline-none focus:border-red-700/70"
             placeholder="Spotify profile link"
           />
           <input
             type="text"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
+            className="w-full rounded-xl border border-red-900/40 bg-black/40 px-4 py-3 text-sm text-amber-100 outline-none focus:border-red-700/70"
             placeholder="YouTube Music profile link"
           />
           <input
             type="text"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
+            className="w-full rounded-xl border border-red-900/40 bg-black/40 px-4 py-3 text-sm text-amber-100 outline-none focus:border-red-700/70"
             placeholder="Apple Music profile link"
           />
         </div>
 
-        <Button onClick={next} className="w-full bg-indigo-500 text-white hover:bg-indigo-600">
+        <Button onClick={next} className="w-full bg-red-700 text-amber-100 hover:bg-red-600">
           Continue
         </Button>
       </div>
