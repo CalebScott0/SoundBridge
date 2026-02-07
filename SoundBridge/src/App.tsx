@@ -1,32 +1,25 @@
-import { Button } from "@/components/ui/button"; // Import the button
-import { useEffect } from "react";
-import { auth } from "../firebase";
-import { ProfileCard } from "./components/ProfileCard";
-import { Progress } from "./components/ui/progress";
-import { Bold } from "lucide-react";
-import RoleButton from "./components/ui/rolebutton";
-import './components/ui/rolebutton.css';
+import { useState } from "react";
+import { StarterPage } from "@/components/StarterPage";
+import { SwipableCards } from "@/components/SwipableCards";
+import { Footer } from "@/components/Footer";
 
 function App() {
-  useEffect(() => {
-    console.log("Firebase Auth Object", auth);
-  });
+  const [started, setStarted] = useState(false);
+
   return (
     <>
-      <div style={{margin: "20px", fontSize: "24px"}}>
-        <p style={{fontWeight: "bold"}}>Choose your role</p>
-        <p>Select one or multiple roles that fit you as an artist</p>
-      </div>
-      <div className="flex min-h-svh flex-row items-center justify-center">
-        <RoleButton  name="Guitarist"/>
-        <RoleButton name="Drummer"/>
-        <RoleButton name="Vocalist"/>
-        <RoleButton name="Bassist"/>
-        <RoleButton name="Performer"/>
-      </div>
-
-
+      {!started ? (
+        <StarterPage onGetStarted={() => setStarted(true)} />
+      ) : (
+        <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
+          <div className="mx-auto max-w-6xl">
+            <SwipableCards />
+          </div>
+          <Footer />
+        </div>
+      )}
     </>
   );
 }
+
 export default App;
