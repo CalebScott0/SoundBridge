@@ -12,8 +12,7 @@ export function SwipableCards() {
     const fetchProfiles = async () => {
       try {
         // db collection users
-        const usersRef = collection(db, "users");
-
+        const usersRef = collection(db, "Users");
         // query profiles with complete setup
         const q = query(usersRef, where("setupComplete", "==", true));
 
@@ -22,7 +21,7 @@ export function SwipableCards() {
         const fetchedData = querySnapshot.docs.map(
           (doc) => doc.data() as AppUser,
         );
-
+        console.log(querySnapshot.size);
         setProfiles(fetchedData);
       } catch (error) {
         console.error("Error fetching profiles:", error);
