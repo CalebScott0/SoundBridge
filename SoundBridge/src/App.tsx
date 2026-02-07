@@ -4,6 +4,7 @@ import { SigninSignup } from "@/components/SigninSignup";
 import { SwipableCards } from "@/components/SwipableCards";
 import { Footer } from "@/components/Footer";
 import { First, Second, Third } from "@/components/Login";
+import {ArtistCard} from "@/components/Cards";
 
 function App() {
   const [stage, setStage] = useState<
@@ -17,6 +18,7 @@ function App() {
 
   return (
     <>
+    
       {stage === "starter" && (
         <StarterPage
           onGetStarted={() => {
