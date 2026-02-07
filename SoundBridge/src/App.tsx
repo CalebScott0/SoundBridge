@@ -6,8 +6,7 @@ import { Footer } from "@/components/Footer";
 import { First, Second, Third } from "@/components/Login";
 import { type AppUser } from "./types";
 import { doc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../firebase";
+import { db } from "../firebase";
 
 function App() {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -30,29 +29,33 @@ function App() {
     socials: { soundcloud: "", spotify: "", youtube: "", apple: "" },
   });
 
+  const uploadToCloudinary = async (
+    file: File,
+    resourceType: "image" | "video",
+  ) => {
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "SoundBridge");
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/dpjthgy4n/${resourceType}/upload`,
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+    const json = await res.json();
+    if (json.error) throw new Error(json.error.message);
+    return json.secure_url;
+  };
+
   const handleFinalSubmit = async () => {
     if (!user) return;
     try {
       let photoUrl = user.imageUrl || "";
       let audioUrl = user.audioUrl || "";
 
-      if (photoFile) {
-        const photoRef = ref(
-          storage,
-          `users/${user.uid}/profile_${Date.now()}`,
-        );
-        await uploadBytes(photoRef, photoFile);
-        photoUrl = await getDownloadURL(photoRef);
-      }
-
-      if (audioFile) {
-        const audioRef = ref(
-          storage,
-          `users/${user.uid}/preview_${Date.now()}`,
-        );
-        await uploadBytes(audioRef, audioFile);
-        audioUrl = await getDownloadURL(audioRef);
-      }
+      if (photoFile) photoUrl = await uploadToCloudinary(photoFile, "image");
+      if (audioFile) audioUrl = await uploadToCloudinary(audioFile, "video");
 
       const userRef = doc(db, "users", user.uid);
       const finalProfile: AppUser = {
@@ -77,7 +80,7 @@ function App() {
       setStage("cards");
     } catch (error) {
       console.error("Error finalizing profile:", error);
-      alert("Failed to save profile. Please check your connection.");
+      alert("Failed to save profile. Check Cloudinary credentials.");
     }
   };
 
@@ -86,18 +89,16 @@ function App() {
       {stage === "starter" && (
         <StarterPage onGetStarted={() => setStage("auth")} />
       )}
-
       {stage === "auth" && (
         <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
           <SigninSignup
-            onSuccess={(authenticatedUser: AppUser) => {
-              setUser(authenticatedUser);
-              setStage(authenticatedUser.setupComplete ? "cards" : "login");
+            onSuccess={(u: AppUser) => {
+              setUser(u);
+              setStage(u.setupComplete ? "cards" : "login");
             }}
           />
         </div>
       )}
-
       {stage === "login" && (
         <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
           {step === "first" && (
@@ -131,7 +132,6 @@ function App() {
           )}
         </div>
       )}
-
       {stage === "cards" && (
         <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
           <div className="mx-auto max-w-6xl">
