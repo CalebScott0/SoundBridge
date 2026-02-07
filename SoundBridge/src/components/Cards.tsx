@@ -116,60 +116,60 @@ export function ArtistCard({
   onCollab,
 }: ArtistCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isFullMode, setIsFullMode] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const audio = audioRef.current; // store the current audio element in a variable
-    if (!audio || !profile.audioUrl) return; // if there's no audio element or audio URL, do nothing
-
-    if (!isTop) {
-      // if this card is not the top card, ensure the audio is stopped and reset
-      audio.pause(); // pause the audio
-      audio.currentTime = 0; // set the audio back to the beginning
-      return;
-    }
-
-    audio.currentTime = 0;
-    audio.play().catch(() => undefined);
-
-    const stopAt = 12;
+    const audio = audioRef.current;
+    if (!audio) return;
     const handleTimeUpdate = () => {
-      if (audio.currentTime >= stopAt) {
+      if (!isFullMode && audio.currentTime >= 10) {
         audio.pause();
         audio.currentTime = 0;
+        setIsPlaying(false);
       }
     };
-
+    const handleEnd = () => setIsPlaying(false);
     audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("ended", handleEnd);
     return () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("ended", handleEnd);
       audio.pause();
-      audio.currentTime = 0;
     };
-  }, [isTop, profile.audioUrl]);
+  }, [isFullMode]);
 
-  const handleSwipe = (direction: "left" | "right") => {
-    if (direction === "left") {
-      onPass?.(profile);
+  useEffect(() => {
+    if (!isTop && isPlaying) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    }
+  }, [isTop]);
+
+  const togglePlay = (full: boolean) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying && isFullMode === full) {
+      audio.pause();
+      setIsPlaying(false);
     } else {
-      onCollab?.(profile);
+      setIsFullMode(full);
+      if (isFullMode !== full) audio.currentTime = 0;
+      audio.play().catch(() => alert("Interact with page first"));
+      setIsPlaying(true);
     }
   };
 
   return (
     <Card
       className="cursor-pointer border-white/10 bg-zinc-900 text-white"
-      onClick={() => setShowDetails((prev) => !prev)}
-      role="button"
-      tabIndex={0}
+      onClick={() => setShowDetails(!showDetails)}
     >
       <CardHeader className="space-y-3">
         <CardTitle className="text-2xl font-semibold">{profile.name}</CardTitle>
-        <Badge className="text-lg">
-          {profile.role == "artist" ? "Artist" : "Producer"}
-        </Badge>
+        <Badge className="text-lg">{profile.role}</Badge>
       </CardHeader>
-
       <CardContent className="space-y-4">
         <div className="overflow-hidden rounded-2xl">
           <img
@@ -178,22 +178,37 @@ export function ArtistCard({
             className="h-72 w-full object-cover"
           />
         </div>
-
+        <div className="flex w-full gap-2">
+          <Button
+            variant={isPlaying && !isFullMode ? "destructive" : "secondary"}
+            className="h-10 flex-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlay(false);
+            }}
+          >
+            {isPlaying && !isFullMode ? "Stop Preview" : "Preview (10s)"}
+          </Button>
+          <Button
+            variant={isPlaying && isFullMode ? "destructive" : "default"}
+            className="h-10 flex-1 bg-indigo-600 hover:bg-indigo-700"
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlay(true);
+            }}
+          >
+            {isPlaying && isFullMode ? "Stop Full" : "Full Clip"}
+          </Button>
+        </div>
         <TagBadges tags={profile.genres ?? []} />
-
         {showDetails && <DetailsPanel profile={profile} />}
-
         <audio ref={audioRef} src={profile.audioUrl} />
       </CardContent>
-
-      <CardFooter className="flex flex-col items-start gap-4">
-        {/* Compatibility Badge */}
+      <CardFooter className="flex flex-col gap-4">
         <CompatibilityBadge label={profile.compatibility} />
-
-        {/* Button Container - Added w-full to fill the card */}
         <ActionButtons
-          onPass={() => handleSwipe("left")}
-          onCollab={() => handleSwipe("right")}
+          onPass={() => onPass?.(profile)}
+          onCollab={() => onCollab?.(profile)}
         />
       </CardFooter>
     </Card>
