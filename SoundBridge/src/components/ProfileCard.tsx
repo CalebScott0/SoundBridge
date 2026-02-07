@@ -1,44 +1,77 @@
-import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { useState } from "react";
 import { db } from "../../firebase";
+import { doc, updateDoc } from "firebase/firestore";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { type AppUser } from "../App";
 
-// Define Producer type
-interface Producer {
-  name: string;
-  bio: string;
-  tags: string[];
-  audioUrl?: string; // optional field
-}
+export function ProfileForm({
+  user,
+  onComplete,
+}: {
+  user: AppUser;
+  onComplete: () => void;
+}) {
+  const [bio, setBio] = useState("");
+  const [loading, setLoading] = useState(false);
 
-export const ProfileCard = () => {
-  const [data, setData] = useState<Producer | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const docRef = doc(db, "producers", "test-producer");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) setData(docSnap.data() as Producer);
-    };
-    fetchData();
-  }, []);
-
-  if (!data) return <div>Loading Producer...</div>;
+  const handleSaveProfile = async () => {
+    setLoading(true);
+    try {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        bio: bio,
+        setupComplete: true, // This flips the switch in your App.tsx logic
+        updatedAt: new Date(),
+      });
+      onComplete();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="max-w-sm overflow-hidden rounded-2xl bg-white p-6 shadow-lg">
-      {/* This is where your Canva-to-Tailwind code goes */}
-      <h2 className="text-2xl font-bold">{data.name}</h2>
-      <p className="my-2 text-gray-600">{data.bio}</p>
-      <div className="flex gap-2">
-        {data.tags.map((tag: string) => (
-          <span
-            key={tag}
-            className="rounded-md bg-blue-100 px-2 py-1 text-sm text-blue-800"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-    </div>
+    <Card className="w-[450px] border-none p-6 shadow-xl">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">
+          Complete your Profile
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="bio">Tell us about your sound</Label>
+          <Textarea
+            id="bio"
+            placeholder="I produce trap beats with a lo-fi twist..."
+            className="h-32 resize-none"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="audio">Upload your best snippet (MP3)</Label>
+          <Input
+            id="audio"
+            type="file"
+            accept="audio/*"
+            className="cursor-pointer"
+          />
+        </div>
+
+        <Button
+          onClick={handleSaveProfile}
+          className="bg-primary h-12 w-full text-lg"
+          disabled={loading || !bio}
+        >
+          {loading ? "Saving..." : "Start Matching"}
+        </Button>
+      </CardContent>
+    </Card>
   );
-};
+}
