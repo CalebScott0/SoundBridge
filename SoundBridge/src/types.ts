@@ -1,22 +1,35 @@
 export interface AppUser {
-  uid: string; // Keep this for Firebase lookups
-  name: string;
-  imageUrl: string;
-  role: string; // e.g., ['Vocalist', 'Songwriter']
-  genres: string[];
-  audioUrl?: string;
-  bio: string;
+  uid: string;
+  role: "artist" | "producer";
   setupComplete: boolean;
-  contact: {
-    email?: string;
-    phone?: string;
-    location?: string;
+
+  // Personal Details from Step 2
+  firstName?: string;
+  lastName?: string;
+  artistName?: string;
+  name?: string; // Display name (usually artistName or First + Last)
+  dob?: string;
+  gender?: string;
+
+  imageUrl?: string;
+  bio?: string;
+  genres?: string[];
+  audioUrl?: string;
+
+  contact?: {
+    email: string;
+    phone: string;
+    location: string;
   };
-  socials: {
-    instagram?: string;
-    tiktok?: string;
-    twitter?: string;
-    website?: string;
+
+  // Music-specific Socials from Step 3
+  socials?: {
+    soundcloud: string;
+    spotify: string;
+    youtube: string;
+    apple: string;
   };
-  compatibility?: string; // AI generated later
+
+  compatibility?: string;
+  updatedAt?: Date;
 }

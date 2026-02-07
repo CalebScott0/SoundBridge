@@ -55,27 +55,51 @@ function App() {
     compatibility: "Shared love for analog tape warmth",
   };
 
+      if (photoFile) photoUrl = await uploadToCloudinary(photoFile, "image");
+      if (audioFile) audioUrl = await uploadToCloudinary(audioFile, "video");
+
+      const userRef = doc(db, "users", user.uid);
+      const finalProfile: AppUser = {
+        ...user,
+        role: accountType.toLowerCase() as "artist" | "producer",
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        artistName: formData.artistName,
+        name:
+          formData.artistName || `${formData.firstName} ${formData.lastName}`,
+        dob: formData.dob,
+        gender: formData.gender,
+        imageUrl: photoUrl,
+        audioUrl: audioUrl,
+        setupComplete: true,
+        updatedAt: new Date(),
+        socials: { ...formData.socials },
+      };
+
+      await updateDoc(userRef, finalProfile as any);
+      setUser(finalProfile);
+      setStage("cards");
+    } catch (error) {
+      console.error("Error finalizing profile:", error);
+      alert("Failed to save profile. Check Cloudinary credentials.");
+    }
+  };
 
   return (
     <>
       {stage === "starter" && (
-        <StarterPage
-          onGetStarted={() => {
-            setStage("auth");
-            setStep("first");
-          }}
-        />
+        <StarterPage onGetStarted={() => setStage("auth")} />
       )}
-
       {stage === "auth" && (
         <div className="page-transition min-h-svh justify-center bg-gradient-to-br from-black via-red-950 to-stone-950 px-4 py-10 text-amber-100">
           <SigninSignup
-            onSignin={() => setStage("login")}
-            onSignup={() => setStage("login")}
+            onSuccess={(u: AppUser) => {
+              setUser(u);
+              setStage(u.setupComplete ? "cards" : "login");
+            }}
           />
         </div>
       )}
-
       {stage === "login" && (
         <div className="page-transition min-h-svh justify-center bg-gradient-to-br from-black via-red-950 to-stone-950 px-4 py-10 text-amber-100">
           {step === "first" && (
@@ -91,7 +115,13 @@ function App() {
             />
           )}
           {step === "second" && (
-            <Second name={accountType} next={() => setStep("third")} />
+            <Second
+              name={accountType}
+              formData={formData}
+              setFormData={setFormData}
+              setPhotoFile={setPhotoFile}
+              next={() => setStep("third")}
+            />
           )}
           {step === "third" && (
             <Third

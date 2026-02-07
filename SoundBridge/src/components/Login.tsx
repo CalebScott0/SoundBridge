@@ -1,7 +1,31 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
-export function First({ artist, producer }) {
+// --- Types for Props ---
+interface FormData {
+  firstName: string;
+  lastName: string;
+  artistName: string;
+  dob: string;
+  gender: string;
+  socials: {
+    soundcloud: string;
+    spotify: string;
+    youtube: string;
+    apple: string;
+  };
+}
+
+interface StepProps {
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  next: () => void;
+}
+
+// --- SHARED PROGRESS HEADER ---
+function SetupHeader({ step }: { step: number }) {
+  const progress = (step / 3) * 100;
   return (
     <div className="mx-auto w-full max-w-xl rounded-3xl border border-red-900/60 bg-black/40 p-8 text-center shadow-lg">
       <p className="text-xs uppercase tracking-[0.3em] text-amber-200">
@@ -29,14 +53,61 @@ export function First({ artist, producer }) {
           Producer
         </Button>
       </div>
+      <Progress value={progress} className="h-2 bg-white/10" />
     </div>
   );
 }
 
-export function Second({ name, next }) {
-  const [selectedGender, setSelectedGender] = useState<
-    "Male" | "Female" | "Other" | null
-  >(null);
+// --- STEP 1: ROLE SELECTION ---
+export function First({
+  artist,
+  producer,
+}: {
+  artist: () => void;
+  producer: () => void;
+}) {
+  return (
+    <>
+      <SetupHeader step={1} />
+      <div className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-lg">
+        <p className="text-xs tracking-[0.3em] text-indigo-200 uppercase">
+          SoundBridge
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">
+          Let’s set up your account
+        </h1>
+        <p className="mt-2 text-sm text-slate-300">
+          Which type of account would you like to set up?
+        </p>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <Button
+            onClick={artist}
+            variant="outline"
+            className="h-12 border-indigo-400/40 bg-white/5 text-indigo-100 hover:bg-indigo-500 hover:text-white"
+          >
+            Artist
+          </Button>
+          <Button
+            onClick={producer}
+            variant="outline"
+            className="h-12 border-indigo-400/40 bg-white/5 text-indigo-100 hover:bg-indigo-500 hover:text-white"
+          >
+            Producer
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// --- STEP 2: PROFILE DETAILS ---
+export function Second({
+  name,
+  next,
+  formData,
+  setFormData,
+  setPhotoFile,
+}: StepProps & { name: string; setPhotoFile: (file: File) => void }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -65,18 +136,7 @@ export function Second({ name, next }) {
                   alt="Profile preview"
                   className="h-full w-full object-cover"
                 />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-8 w-8 text-white"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path d="M9 3a1 1 0 0 0-.894.553L7.382 5H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2.382l-.724-1.447A1 1 0 0 0 15 3H9zm3 5a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" />
-                  </svg>
-                </div>
-              )}
+              </label>
             </div>
             <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-red-900/60 bg-black/40 px-6 py-3.5 text-sm text-amber-100 hover:bg-red-900/30">
               <svg
@@ -171,6 +231,33 @@ export function Second({ name, next }) {
               Other
             </Button>
           </div>
+          <div>
+            <label className="text-xs tracking-[0.25em] text-indigo-200 uppercase">
+              Gender
+            </label>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {["Male", "Female", "Other"].map((g) => (
+                <Button
+                  key={g}
+                  variant="outline"
+                  onClick={() => updateField("gender", g)}
+                  className={
+                    formData.gender === g
+                      ? "border-indigo-400/60 bg-indigo-500/30 text-white"
+                      : "border-white/10 bg-white/5 text-white hover:bg-white/10"
+                  }
+                >
+                  {g}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <Button
+            onClick={next}
+            className="w-full bg-indigo-500 text-white hover:bg-indigo-600"
+          >
+            Continue
+          </Button>
         </div>
 
         <Button
@@ -180,7 +267,7 @@ export function Second({ name, next }) {
           Continue
         </Button>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -231,6 +318,6 @@ export function Third({ next }) {
           Continue
         </Button>
       </div>
-    </div>
+    </>
   );
 }

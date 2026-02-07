@@ -117,44 +117,49 @@ export function ArtistCard({
   onCollab,
 }: ArtistCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isFullMode, setIsFullMode] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const swipeControls = useAnimation();
 
   useEffect(() => {
-    const audio = audioRef.current; // store the current audio element in a variable
-    if (!audio || !profile.audioUrl) return; // if there's no audio element or audio URL, do nothing
-
-    if (!isTop) {
-      // if this card is not the top card, ensure the audio is stopped and reset
-      audio.pause(); // pause the audio
-      audio.currentTime = 0; // set the audio back to the beginning
-      return;
-    }
-
-    audio.currentTime = 0;
-    audio.play().catch(() => undefined);
-
-    const stopAt = 12;
+    const audio = audioRef.current;
+    if (!audio) return;
     const handleTimeUpdate = () => {
-      if (audio.currentTime >= stopAt) {
+      if (!isFullMode && audio.currentTime >= 10) {
         audio.pause();
         audio.currentTime = 0;
+        setIsPlaying(false);
       }
     };
-
+    const handleEnd = () => setIsPlaying(false);
     audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("ended", handleEnd);
     return () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("ended", handleEnd);
       audio.pause();
-      audio.currentTime = 0;
     };
-  }, [isTop, profile.audioUrl]);
+  }, [isFullMode]);
 
-  const handleSwipe = (direction: "left" | "right") => {
-    if (direction === "left") {
-      onPass?.(profile);
+  useEffect(() => {
+    if (!isTop && isPlaying) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    }
+  }, [isTop]);
+
+  const togglePlay = (full: boolean) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying && isFullMode === full) {
+      audio.pause();
+      setIsPlaying(false);
     } else {
-      onCollab?.(profile);
+      setIsFullMode(full);
+      if (isFullMode !== full) audio.currentTime = 0;
+      audio.play().catch(() => alert("Interact with page first"));
+      setIsPlaying(true);
     }
   };
 
