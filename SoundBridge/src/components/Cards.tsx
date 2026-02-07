@@ -177,7 +177,7 @@ export function ArtistCard({
           />
         </div>
 
-        <TagBadges tags={profile.genres} />
+        <TagBadges tags={profile.genres ?? []} />
 
         {showDetails && <DetailsPanel profile={profile} />}
 

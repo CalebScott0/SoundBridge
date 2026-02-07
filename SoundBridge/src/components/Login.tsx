@@ -1,10 +1,38 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
-export function First({ artist, producer }) {
+// --- Types for Props ---
+interface FormData {
+  firstName: string;
+  lastName: string;
+  artistName: string;
+  dob: string;
+  gender: string;
+  socials: {
+    soundcloud: string;
+    spotify: string;
+    youtube: string;
+    apple: string;
+  };
+}
+
+interface StepProps {
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  next: () => void;
+}
+
+// --- STEP 1: ROLE SELECTION ---
+export function First({
+  artist,
+  producer,
+}: {
+  artist: () => void;
+  producer: () => void;
+}) {
   return (
     <div className="mx-auto w-full max-w-xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-lg">
-      <p className="text-xs uppercase tracking-[0.3em] text-indigo-200">
+      <p className="text-xs tracking-[0.3em] text-indigo-200 uppercase">
         SoundBridge
       </p>
       <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">
@@ -33,10 +61,13 @@ export function First({ artist, producer }) {
   );
 }
 
-export function Second({ name, next }) {
-  const [selectedGender, setSelectedGender] = useState<
-    "Male" | "Female" | "Other" | null
-  >(null);
+// --- STEP 2: PROFILE DETAILS ---
+export function Second({
+  name,
+  next,
+  formData,
+  setFormData,
+}: StepProps & { name: string }) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -44,6 +75,13 @@ export function Second({ name, next }) {
       if (photoUrl) URL.revokeObjectURL(photoUrl);
     };
   }, [photoUrl]);
+
+  const updateField = (
+    field: keyof Omit<FormData, "socials">,
+    value: string,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="mx-auto w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 shadow-lg">
@@ -54,7 +92,7 @@ export function Second({ name, next }) {
 
       <div className="mt-6 space-y-6">
         <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-          <label className="text-xs uppercase tracking-[0.25em] text-indigo-200">
+          <label className="text-xs tracking-[0.25em] text-indigo-200 uppercase">
             Profile photo
           </label>
           <div className="mt-4 flex flex-col items-center justify-center gap-4">
@@ -62,16 +100,15 @@ export function Second({ name, next }) {
               {photoUrl ? (
                 <img
                   src={photoUrl}
-                  alt="Profile preview"
+                  alt="Preview"
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center">
+                <div className="flex h-full w-full items-center justify-center text-white">
                   <svg
                     viewBox="0 0 24 24"
-                    className="h-8 w-8 text-white"
+                    className="h-8 w-8"
                     fill="currentColor"
-                    aria-hidden="true"
                   >
                     <path d="M9 3a1 1 0 0 0-.894.553L7.382 5H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2.382l-.724-1.447A1 1 0 0 0 15 3H9zm3 5a4 4 0 1 1 0 8 4 4 0 0 1 0-8z" />
                   </svg>
@@ -79,24 +116,14 @@ export function Second({ name, next }) {
               )}
             </div>
             <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3.5 text-sm text-slate-200 hover:bg-white/10">
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4 text-white"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path d="M12 5a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H7a1 1 0 1 1 0-2h4V6a1 1 0 0 1 1-1z" />
-              </svg>
               Upload photo
               <input
                 type="file"
                 accept="image/*"
                 className="sr-only"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (!file) return;
-                  if (photoUrl) URL.revokeObjectURL(photoUrl);
-                  setPhotoUrl(URL.createObjectURL(file));
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) setPhotoUrl(URL.createObjectURL(file));
                 }}
               />
             </label>
@@ -106,70 +133,56 @@ export function Second({ name, next }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <input
             className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
-            type="text"
             placeholder="First name"
+            value={formData.firstName}
+            onChange={(e) => updateField("firstName", e.target.value)}
           />
           <input
             className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
-            type="text"
             placeholder="Last name"
+            value={formData.lastName}
+            onChange={(e) => updateField("lastName", e.target.value)}
           />
         </div>
 
         <input
           className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
-          type="text"
           placeholder={`${name}'s name`}
+          value={formData.artistName}
+          onChange={(e) => updateField("artistName", e.target.value)}
         />
 
         <div>
-          <label className="text-xs uppercase tracking-[0.25em] text-indigo-200">
+          <label className="text-xs tracking-[0.25em] text-indigo-200 uppercase">
             Date of birth
           </label>
           <input
             type="date"
             className="mt-3 w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
+            value={formData.dob}
+            onChange={(e) => updateField("dob", e.target.value)}
           />
         </div>
 
         <div>
-          <label className="text-xs uppercase tracking-[0.25em] text-indigo-200">
+          <label className="text-xs tracking-[0.25em] text-indigo-200 uppercase">
             Gender
           </label>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
-            <Button
-              variant="outline"
-              onClick={() => setSelectedGender("Male")}
-              className={
-                selectedGender === "Male"
-                  ? "border-indigo-400/60 bg-indigo-500/30 text-white"
-                  : "border-white/10 bg-white/5 text-white hover:bg-white/10"
-              }
-            >
-              Male
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setSelectedGender("Female")}
-              className={
-                selectedGender === "Female"
-                  ? "border-indigo-400/60 bg-indigo-500/30 text-white"
-                  : "border-white/10 bg-white/5 text-white hover:bg-white/10"
-              }
-            >
-              Female
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setSelectedGender("Other")}
-              className={
-                selectedGender === "Other"
-                  ? "border-indigo-400/60 bg-indigo-500/30 text-white"
-                  : "border-white/10 bg-white/5 text-white hover:bg-white/10"
-              }
-            >
-              Other
-            </Button>
+            {["Male", "Female", "Other"].map((g) => (
+              <Button
+                key={g}
+                variant="outline"
+                onClick={() => updateField("gender", g)}
+                className={
+                  formData.gender === g
+                    ? "border-indigo-400/60 bg-indigo-500/30 text-white"
+                    : "border-white/10 bg-white/5 text-white hover:bg-white/10"
+                }
+              >
+                {g}
+              </Button>
+            ))}
           </div>
         </div>
 
@@ -184,7 +197,15 @@ export function Second({ name, next }) {
   );
 }
 
-export function Third({ next }) {
+// --- STEP 3: SHOWCASE ---
+export function Third({ next, formData, setFormData }: StepProps) {
+  const updateSocial = (platform: keyof FormData["socials"], value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      socials: { ...prev.socials, [platform]: value },
+    }));
+  };
+
   return (
     <div className="mx-auto w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-lg">
       <h1 className="text-3xl font-semibold">Let’s showcase your work</h1>
@@ -194,7 +215,7 @@ export function Third({ next }) {
 
       <div className="mt-6 space-y-6">
         <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-left">
-          <label className="text-xs uppercase tracking-[0.25em] text-indigo-200">
+          <label className="text-xs tracking-[0.25em] text-indigo-200 uppercase">
             Audio preview
           </label>
           <input
@@ -205,29 +226,27 @@ export function Third({ next }) {
         </div>
 
         <div className="space-y-3">
-          <input
-            type="text"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
-            placeholder="SoundCloud profile link"
-          />
-          <input
-            type="text"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
-            placeholder="Spotify profile link"
-          />
-          <input
-            type="text"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
-            placeholder="YouTube Music profile link"
-          />
-          <input
-            type="text"
-            className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
-            placeholder="Apple Music profile link"
-          />
+          {Object.keys(formData.socials).map((platform) => (
+            <input
+              key={platform}
+              type="text"
+              className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-white outline-none focus:border-indigo-400/60"
+              placeholder={`${platform.charAt(0).toUpperCase() + platform.slice(1)} profile link`}
+              value={formData.socials[platform as keyof FormData["socials"]]}
+              onChange={(e) =>
+                updateSocial(
+                  platform as keyof FormData["socials"],
+                  e.target.value,
+                )
+              }
+            />
+          ))}
         </div>
 
-        <Button onClick={next} className="w-full bg-indigo-500 text-white hover:bg-indigo-600">
+        <Button
+          onClick={next}
+          className="w-full bg-indigo-500 text-white hover:bg-indigo-600"
+        >
           Continue
         </Button>
       </div>

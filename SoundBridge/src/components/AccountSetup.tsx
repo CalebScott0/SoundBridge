@@ -10,7 +10,7 @@ import {
   CardDescription,
 } from "../../src/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { type AppUser } from "../App"; // Importing the interface from App
+import { type AppUser } from "../../src/types"; // Importing the interface from App
 
 interface Props {
   onLoginSuccess: (user: AppUser) => void;
@@ -25,29 +25,29 @@ export function AccountSetup({ onLoginSuccess }: Props) {
       const userRef = doc(db, "users", fbUser.uid);
       const userSnap = await getDoc(userRef);
 
-      const userData: AppUser = {
-        uid: fbUser.uid,
-        displayName: fbUser.displayName,
-        //email: fbUser.email,
-        photoURL: fbUser.photoURL,
-        role: role,
-      };
-      console.log("ROLE: ", role);
-
       if (!userSnap.exists()) {
-        // Save new user to Firestore
         await setDoc(userRef, {
-          ...userData,
+          uid: fbUser.uid,
+          displayName: fbUser.displayName,
+          photoURL: fbUser.photoURL,
+          role: role,
+          setupComplete: false, // CRITICAL: This keeps them on the setup screen
           createdAt: new Date(),
-          setupComplete: false,
         });
-      } else {
-        // Use existing role if they already signed up
-        const existingData = userSnap.data();
-        userData.role = existingData.role;
       }
 
-      onLoginSuccess(userData);
+      // Pass the user up so the parent knows to show the "Profile Form" (your screenshot)
+      onLoginSuccess({
+        uid: fbUser.uid,
+        role,
+        setupComplete: false,
+        name: fbUser.displayName || "",
+        imageUrl: fbUser.photoURL || "",
+        genres: [], // Fixes the .map() error
+        bio: "",
+        contact: { email: fbUser.email || "", phone: "", location: "" },
+        socials: { spotify: "", apple: "", youtube: "", soundcloud: "" },
+      });
     } catch (error) {
       console.error("Auth failed", error);
     }
