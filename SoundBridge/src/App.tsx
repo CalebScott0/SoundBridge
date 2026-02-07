@@ -6,9 +6,8 @@ import { Footer } from "@/components/Footer";
 import { First, Second, Third } from "@/components/Login";
 import { type AppUser } from "./types";
 import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
-
-import { seedDatabase } from "./seed"; // Import the function
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../firebase";
 
 function App() {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -19,6 +18,8 @@ function App() {
   const [accountType, setAccountType] = useState<"Artist" | "Producer">(
     "Artist",
   );
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -31,8 +32,28 @@ function App() {
 
   const handleFinalSubmit = async () => {
     if (!user) return;
-
     try {
+      let photoUrl = user.imageUrl || "";
+      let audioUrl = user.audioUrl || "";
+
+      if (photoFile) {
+        const photoRef = ref(
+          storage,
+          `users/${user.uid}/profile_${Date.now()}`,
+        );
+        await uploadBytes(photoRef, photoFile);
+        photoUrl = await getDownloadURL(photoRef);
+      }
+
+      if (audioFile) {
+        const audioRef = ref(
+          storage,
+          `users/${user.uid}/preview_${Date.now()}`,
+        );
+        await uploadBytes(audioRef, audioFile);
+        audioUrl = await getDownloadURL(audioRef);
+      }
+
       const userRef = doc(db, "users", user.uid);
       const finalProfile: AppUser = {
         ...user,
@@ -44,6 +65,8 @@ function App() {
           formData.artistName || `${formData.firstName} ${formData.lastName}`,
         dob: formData.dob,
         gender: formData.gender,
+        imageUrl: photoUrl,
+        audioUrl: audioUrl,
         setupComplete: true,
         updatedAt: new Date(),
         socials: { ...formData.socials },
@@ -54,17 +77,12 @@ function App() {
       setStage("cards");
     } catch (error) {
       console.error("Error finalizing profile:", error);
+      alert("Failed to save profile. Please check your connection.");
     }
   };
 
   return (
     <>
-      <button
-        onClick={() => seedDatabase()}
-        className="fixed right-4 bottom-4 z-50 rounded bg-red-600 px-2 py-1 text-xs text-white opacity-20 hover:opacity-100"
-      >
-        DEBUG: Seed DB
-      </button>
       {stage === "starter" && (
         <StarterPage onGetStarted={() => setStage("auth")} />
       )}
@@ -72,7 +90,6 @@ function App() {
       {stage === "auth" && (
         <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
           <SigninSignup
-            // Pass the user object received from Firebase back to App state
             onSuccess={(authenticatedUser: AppUser) => {
               setUser(authenticatedUser);
               setStage(authenticatedUser.setupComplete ? "cards" : "login");
@@ -100,6 +117,7 @@ function App() {
               name={accountType}
               formData={formData}
               setFormData={setFormData}
+              setPhotoFile={setPhotoFile}
               next={() => setStep("third")}
             />
           )}
@@ -107,6 +125,7 @@ function App() {
             <Third
               formData={formData}
               setFormData={setFormData}
+              setAudioFile={setAudioFile}
               next={handleFinalSubmit}
             />
           )}
@@ -120,47 +139,7 @@ function App() {
           </div>
           <Footer />
         </div>
-      )} */}
-        <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
-
-       <div style={{margin: "20px", fontSize: "24px"}}>
-        <p style={{fontWeight: "bold"}}>Choose your role</p>
-        <p>Select one or multiple roles that fit you as an artist</p>
-      </div>
-      <div className="flex flex-row items-center justify-center">
-        <RoleButton  name="Guitarist"/>
-        <RoleButton name="Drummer"/>
-        <RoleButton name="Vocalist"/>
-        <RoleButton name="Bassist"/>
-        <RoleButton name="Performer"/>
-      </div>
-
-      <div style={{margin:"20px", marginTop: "15%", fontSize: "24px"}}>
-        <p style={{fontWeight: "bold"}}>Choose your genres</p>
-        <p>Select one or multiple genres to describe the type of music you create</p>
-      </div>
-      <div className="flex flex-row items-center justify-center">
-        <RoleButton  name="Rock"/>
-        <RoleButton name="Pop"/>
-        <RoleButton name="Hip-Hop"/>
-        <RoleButton name="Jazz"/>
-        <RoleButton name="Electronic"/>
-      </div>
-        <div className="flex flex-row items-center justify-center">
-        <RoleButton  name="Indie"/>
-        <RoleButton name="Latin"/>
-        <RoleButton name="R&B/Soul"/>
-        <RoleButton name="Metal"/>
-        <RoleButton name="Acoustic"/>
-      </div>
-        <div className="flex flex-row items-center justify-center">
-          <RoleButton  name="Blues"/>
-          <RoleButton name="Trap"/>
-          <RoleButton name="Reggae"/>
-          <RoleButton name="K-pop"/>
-          <RoleButton name="Punk"/>
-      </div>
-      </div>
+      )}
     </>
   );
 }
