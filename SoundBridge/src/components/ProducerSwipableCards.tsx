@@ -2,7 +2,11 @@ import { useMemo, useState } from "react";
 import { ArtistCard } from "@/components/Cards";
 import { type AppUser } from "@/types";
 
-export function ProducerSwipableCards() {
+interface ProducerSwipableCardsProps {
+  onMatch?: (profile: AppUser) => void;
+}
+
+export function ProducerSwipableCards({ onMatch }: ProducerSwipableCardsProps) {
   const profiles = useMemo<AppUser[]>(
     () => [
       {
@@ -125,6 +129,11 @@ export function ProducerSwipableCards() {
 
   const advance = () => setIndex((prev) => Math.min(prev + 1, profiles.length));
 
+  const handleMatch = (profile: AppUser) => {
+    onMatch?.(profile);
+    advance();
+  };
+
   return (
     <div className="mx-auto w-full max-w-lg space-y-6">
       <div className="rounded-3xl border border-red-900/60 bg-black/40 p-5 text-amber-100">
@@ -142,7 +151,7 @@ export function ProducerSwipableCards() {
           profile={current}
           isTop
           onPass={advance}
-          onCollab={advance}
+          onCollab={handleMatch}
         />
       )}
 

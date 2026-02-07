@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { StarterPage } from "@/components/StarterPage";
 import { SigninSignup } from "@/components/SigninSignup";
 import { SwipableCards } from "@/components/SwipableCards";
@@ -18,6 +18,19 @@ function App() {
   const [accountType, setAccountType] = useState<"Artist" | "Producer">(
     "Artist",
   );
+  const [matchNotification, setMatchNotification] = useState<AppUser | null>(null);
+  const matchTimerRef = useRef<number | null>(null);
+
+  const showMatchNotification = (profile: AppUser) => {
+    setMatchNotification(profile);
+    if (matchTimerRef.current) {
+      window.clearTimeout(matchTimerRef.current);
+    }
+    matchTimerRef.current = window.setTimeout(() => {
+      setMatchNotification(null);
+      matchTimerRef.current = null;
+    }, 2800);
+  };
 
   const mockProfile: AppUser = {
     uid: "profile-1",
@@ -99,11 +112,24 @@ function App() {
 
       {stage === "cards" && (
         <div className="page-transition min-h-svh justify-center bg-gradient-to-br from-black via-red-950 to-stone-950 px-4 py-10 text-amber-100">
+          {matchNotification && (
+            <div className="pointer-events-none fixed left-1/2 top-6 z-50 w-[92%] max-w-md -translate-x-1/2 rounded-2xl border border-red-900/60 bg-black/80 p-4 text-center text-amber-100 shadow-lg backdrop-blur">
+              <p className="text-xs uppercase tracking-[0.35em] text-amber-200">
+                It’s a match
+              </p>
+              <p className="mt-2 text-base font-semibold">
+                You matched with {matchNotification.name}
+              </p>
+              <p className="mt-1 text-xs text-amber-200/80">
+                Start the collaboration in your deck.
+              </p>
+            </div>
+          )}
           <div className="mx-auto max-w-6xl space-y-8">
             {accountType === "Producer" ? (
-              <ProducerSwipableCards />
+              <ProducerSwipableCards onMatch={showMatchNotification} />
             ) : (
-              <SwipableCards />
+              <SwipableCards onMatch={showMatchNotification} />
             )}
           </div>
           <Footer

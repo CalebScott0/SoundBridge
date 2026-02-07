@@ -2,7 +2,11 @@ import { useMemo, useState } from "react";
 import { ArtistCard } from "@/components/Cards";
 import { type AppUser } from "@/types";
 
-export function SwipableCards() {
+interface SwipableCardsProps {
+    onMatch?: (profile: AppUser) => void;
+}
+
+export function SwipableCards({ onMatch }: SwipableCardsProps) {
     const profiles = useMemo<AppUser[]>(
         () => [
             {
@@ -125,6 +129,11 @@ export function SwipableCards() {
 
     const advance = () => setIndex((prev) => Math.min(prev + 1, profiles.length));
 
+    const handleMatch = (profile: AppUser) => {
+        onMatch?.(profile);
+        advance();
+    };
+
     return (
         <div className="mx-auto w-full max-w-lg">
             {!done && current && (
@@ -132,7 +141,7 @@ export function SwipableCards() {
                     profile={current}
                     isTop
                     onPass={advance}
-                    onCollab={advance}
+                    onCollab={handleMatch}
                 />
             )}
             {done && (
