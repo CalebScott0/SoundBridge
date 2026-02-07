@@ -4,22 +4,14 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyATDZgRuhYpsw_azBThqla6sMa471R4-Tc",
-  //  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: "soundbridge-edc7d.firebaseapp.com",
-  //authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  // projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  projectId: "soundbridge-edc7d",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-console.log("Firebase Config Check:", {
-  apiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  envCheck: import.meta.env,
-});
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
