@@ -27,14 +27,15 @@ interface TagBadgesProps {
 function TagBadges({ tags }: TagBadgesProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      {tags.map((tag) => (
-        <Badge
-          key={tag}
-          className="rounded-full border border-red-900/40 bg-black/40 text-amber-100"
-        >
-          {tag}
-        </Badge>
-      ))}
+      {tags &&
+        tags.map((tag) => (
+          <Badge
+            key={tag}
+            className="rounded-full border border-red-900/40 bg-black/40 text-amber-100"
+          >
+            {tag}
+          </Badge>
+        ))}
     </div>
   );
 }
@@ -122,6 +123,11 @@ export function ArtistCard({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const swipeControls = useAnimation();
 
+  const handleSwipe = (direction: "left" | "right") => {
+    if (direction === "left") onPass?.(profile);
+    else onCollab?.(profile);
+  };
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -147,7 +153,7 @@ export function ArtistCard({
       audioRef.current?.pause();
       setIsPlaying(false);
     }
-  }, [isTop]);
+  }, [isTop, isPlaying]);
 
   const togglePlay = (full: boolean) => {
     const audio = audioRef.current;
@@ -158,96 +164,80 @@ export function ArtistCard({
     } else {
       setIsFullMode(full);
       if (isFullMode !== full) audio.currentTime = 0;
-      audio.play().catch(() => alert("Interact with page first"));
+      audio.play().catch(() => {});
       setIsPlaying(true);
     }
   };
 
   const triggerSwipe = (direction: "left" | "right") => {
-    const x = direction === "left" ? -300 : 300;
     swipeControls
       .start({
-        x,
-        y: 0,
-        rotate: direction === "left" ? -12 : 12,
+        x: direction === "left" ? -500 : 500,
         opacity: 0,
-        transition: { duration: 0.25 },
+        transition: { duration: 0.3 },
       })
       .then(() => {
         handleSwipe(direction);
-        swipeControls.set({ x: 0, y: 0, rotate: 0, opacity: 1 });
+        swipeControls.set({ x: 0, opacity: 1 });
       });
-  };
-
-  const handleDragEnd = (_: unknown, info: { offset: { x: number; y: number } }) => {
-    const { x, y } = info.offset;
-    const threshold = 120;
-
-    if (Math.abs(x) > threshold || Math.abs(y) > threshold) {
-      const direction = x >= 0 ? 1 : -1;
-      swipeControls
-        .start({
-          x: x + direction * 300,
-          y: y,
-          rotate: direction * 12,
-          opacity: 0,
-          transition: { duration: 0.25 },
-        })
-        .then(() => {
-          if (x < 0) {
-            handleSwipe("left");
-          } else {
-            handleSwipe("right");
-          }
-          swipeControls.set({ x: 0, y: 0, rotate: 0, opacity: 1 });
-        });
-    } else {
-      swipeControls.start({
-        x: 0,
-        y: 0,
-        rotate: 0,
-        transition: { type: "spring", stiffness: 280, damping: 20 },
-      });
-    }
   };
 
   return (
     <motion.div
-      drag
+      drag="x"
       animate={swipeControls}
-      onDragEnd={handleDragEnd}
-      className="touch-pan-y"
+      onDragEnd={(_, info) => {
+        if (Math.abs(info.offset.x) > 100)
+          triggerSwipe(info.offset.x > 0 ? "right" : "left");
+        else swipeControls.start({ x: 0 });
+      }}
+      className="touch-none"
     >
       <Card
         className="cursor-pointer border-red-900/60 bg-black/50 text-amber-100"
-        onClick={() => setShowDetails((prev) => !prev)}
-        role="button"
-        tabIndex={0}
+        onClick={() => setShowDetails(!showDetails)}
       >
         <CardHeader className="space-y-3">
-          <CardTitle className="text-2xl font-semibold">{profile.name}</CardTitle>
-          <Badge className="border-red-900/60 bg-red-950/40 text-amber-100">
-            {profile.role}
-          </Badge>
+          <CardTitle className="text-2xl font-semibold">
+            {profile.name}
+          </CardTitle>
+          <Badge className="bg-red-950/40">{profile.role}</Badge>
         </CardHeader>
-
         <CardContent className="space-y-4">
           <div className="overflow-hidden rounded-2xl">
             <img
               src={profile.imageUrl}
               alt={profile.name}
-              className="h-72 w-full object-cover"
+              className="h-full w-full object-cover"
             />
           </div>
-
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay(false);
+              }}
+            >
+              {isPlaying && !isFullMode ? "Pause" : "Preview"}
+            </Button>
+            <Button
+              variant="default"
+              className="flex-1 bg-red-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay(true);
+              }}
+            >
+              {isPlaying && isFullMode ? "Pause" : "Full Clip"}
+            </Button>
+          </div>
           <TagBadges tags={profile.genres} />
-
           {showDetails && <DetailsPanel profile={profile} />}
-
           <audio ref={audioRef} src={profile.audioUrl} />
         </CardContent>
-
-        <CardFooter className="flex flex-col items-start gap-4">
+        <CardFooter className="flex flex-col gap-4">
           <CompatibilityBadge label={profile.compatibility} />
           <ActionButtons
             onPass={() => triggerSwipe("left")}
