@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 interface FooterProps {
   onExplore?: () => void;
   onDeck?: () => void;
+	onProfile?: () => void;
 }
 
-export function Footer({ onExplore, onDeck }: FooterProps) {
+export function Footer({ onExplore, onDeck, onProfile }: FooterProps) {
 	return (
 		<footer className="fixed bottom-0 left-0 right-0 border-t border-red-900/60 bg-black/90 px-4 py-3 backdrop-blur">
 			<div className="mx-auto flex w-full max-w-lg items-center justify-between gap-3">
@@ -44,6 +45,7 @@ export function Footer({ onExplore, onDeck }: FooterProps) {
 				<Button
 					variant="outline"
 					className="flex-1 border-red-900/60 bg-red-950/40 text-amber-100 hover:bg-red-900/40"
+					onClick={onProfile}
 				>
 					<span className="flex items-center justify-center gap-2">
 						<svg
