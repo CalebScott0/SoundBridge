@@ -2,7 +2,7 @@ export interface AppUser {
   uid: string; // Keep this for Firebase lookups
   name: string;
   imageUrl: string;
-  roles: string[]; // e.g., ['Vocalist', 'Songwriter']
+  role: string; // e.g., ['Vocalist', 'Songwriter']
   genres: string[];
   audioUrl?: string;
   bio: string;

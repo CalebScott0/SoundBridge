@@ -4,7 +4,7 @@ import { db } from "../../firebase";
 import { ArtistCard } from "@/components/Cards";
 import { type AppUser } from "../types.ts";
 
-export function SwipableCards() {
+export function SwipableCards({ currentUser }: { currentUser: AppUser }) {
   const [profiles, setProfiles] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,8 +14,13 @@ export function SwipableCards() {
         // db collection users
         const usersRef = collection(db, "Users");
         // query profiles with complete setup
-        const q = query(usersRef, where("setupComplete", "==", true));
-
+        const targetRole =
+          currentUser.role === "artist" ? "producer" : "artist";
+        const q = query(
+          usersRef,
+          where("role", "==", targetRole),
+          where("setupComplete", "==", true),
+        );
         // receive data
         const querySnapshot = await getDocs(q);
         const fetchedData = querySnapshot.docs.map(
@@ -31,7 +36,7 @@ export function SwipableCards() {
     };
 
     fetchProfiles();
-  }, []);
+  }, [currentUser.role]);
 
   if (loading)
     return <div className="p-10 text-center">Loading artists...</div>;

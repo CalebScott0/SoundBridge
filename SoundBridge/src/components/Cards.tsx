@@ -165,7 +165,7 @@ export function ArtistCard({
     >
       <CardHeader className="space-y-3">
         <CardTitle className="text-2xl font-semibold">{profile.name}</CardTitle>
-        <TagBadges tags={profile.roles} />
+        <Badge className="text-lg">{profile.role}</Badge>
       </CardHeader>
 
       <CardContent className="space-y-4">
