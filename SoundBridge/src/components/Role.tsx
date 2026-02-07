@@ -18,6 +18,7 @@ const RoleButton = ({ name }: RoleButtonProps) => {
         border: "none",
         fontSize: "14px",
         fontWeight: 600,
+        transition: "background-color 200ms ease-out, color 200ms ease-out",
     } as const;
 
     return (
