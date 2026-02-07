@@ -1,18 +1,21 @@
-import { useMemo } from "react";
-import { ArtistCard, type ArtistProfile } from "@/components/Cards";
+import { useMemo, useState } from "react";
+import { ArtistCard } from "@/components/Cards";
+import { type AppUser } from "@/types";
 
 export function SwipableCards() {
-    const profiles = useMemo<ArtistProfile[]>(
+    const profiles = useMemo<AppUser[]>(
         () => [
             {
+                uid: "luna",
                 name: "Luna Park",
                 imageUrl:
                     "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
-                roles: ["Vocalist", "Songwriter"],
+                role: "Vocalist / Songwriter",
                 genres: ["Alt Pop", "Indie", "R&B"],
                 audioUrl:
                     "https://cdn.pixabay.com/download/audio/2022/03/15/audio_6b4b2342a1.mp3?filename=lofi-study-112191.mp3",
                 bio: "Moody hooks, stacked harmonies, and late-night energy.",
+                setupComplete: true,
                 contact: {
                     email: "hello@lunaparkmusic.com",
                     location: "Seattle, WA",
@@ -25,14 +28,16 @@ export function SwipableCards() {
                 compatibility: "Shared love for analog tape warmth",
             },
             {
+                uid: "jae",
                 name: "Jae Meridian",
                 imageUrl:
                     "https://images.unsplash.com/photo-1485579149621-3123dd979885?auto=format&fit=crop&w=1200&q=80",
-                roles: ["Guitarist", "Producer"],
+                role: "Guitarist / Producer",
                 genres: ["Shoegaze", "Grunge", "Dream Pop"],
                 audioUrl:
                     "https://cdn.pixabay.com/download/audio/2021/10/26/audio_02b620cc59.mp3?filename=slow-trip-ambient-11157.mp3",
                 bio: "Fuzzy guitars, analog tape textures, and cinematic riffs.",
+                setupComplete: true,
                 contact: {
                     email: "jam@jaemeridian.com",
                     location: "Portland, OR",
@@ -45,14 +50,16 @@ export function SwipableCards() {
                 compatibility: "Both love saturated guitar stacks",
             },
             {
+                uid: "mira",
                 name: "Mira Sol",
                 imageUrl:
                     "https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?auto=format&fit=crop&w=1200&q=80",
-                roles: ["Producer", "DJ"],
+                role: "Producer / DJ",
                 genres: ["House", "Future Funk", "Disco"],
                 audioUrl:
                     "https://cdn.pixabay.com/download/audio/2022/08/20/audio_5200b6572a.mp3?filename=disco-112504.mp3",
                 bio: "Groovy basslines, neon pads, and dancefloor energy.",
+                setupComplete: true,
                 contact: {
                     email: "collab@mirasol.fm",
                     location: "San Diego, CA",
@@ -65,14 +72,16 @@ export function SwipableCards() {
                 compatibility: "Shared love for funky bass grooves",
             },
             {
+                uid: "nova",
                 name: "Nova Rey",
                 imageUrl:
                     "https://images.unsplash.com/photo-1485579149621-3123dd979885?auto=format&fit=crop&w=1200&q=80",
-                roles: ["Alt-R&B Vocalist"],
+                role: "Alt-R&B Vocalist",
                 genres: ["R&B", "Indie", "Soul"],
                 audioUrl:
                     "https://cdn.pixabay.com/download/audio/2022/01/26/audio_4f7f1e1a2e.mp3?filename=deep-ambient-11185.mp3",
                 bio: "Raw vocals, live-band energy, and lyrical hooks.",
+                setupComplete: true,
                 contact: {
                     email: "hello@novarey.com",
                     location: "Seattle, WA",
@@ -85,14 +94,16 @@ export function SwipableCards() {
                 compatibility: "Both lean into analog warmth",
             },
             {
+                uid: "kai",
                 name: "Kai Lumen",
                 imageUrl:
                     "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1200&q=80",
-                roles: ["Sound Designer", "Producer"],
+                role: "Sound Designer / Producer",
                 genres: ["Hyperpop", "Future Bass", "EDM"],
                 audioUrl:
                     "https://cdn.pixabay.com/download/audio/2022/03/10/audio_547c4d8d12.mp3?filename=ambient-110197.mp3",
                 bio: "Glitchy synths and cinematic hooks.",
+                setupComplete: true,
                 contact: {
                     email: "hi@kailumen.com",
                     location: "Portland, OR",
@@ -108,15 +119,30 @@ export function SwipableCards() {
         [],
     );
 
+    const [index, setIndex] = useState(0);
+    const current = profiles[index];
+    const done = index >= profiles.length;
+
+    const advance = () => setIndex((prev) => Math.min(prev + 1, profiles.length));
+
     return (
-        <div className="mx-auto w-full max-w-6xl">
-            <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-6">
-                {profiles.map((profile) => (
-                    <div key={profile.name} className="snap-center shrink-0 w-[320px] sm:w-[380px]">
-                        <ArtistCard profile={profile} isTop={false} />
-                    </div>
-                ))}
-            </div>
+        <div className="mx-auto w-full max-w-lg">
+            {!done && current && (
+                <ArtistCard
+                    profile={current}
+                    isTop
+                    onPass={advance}
+                    onCollab={advance}
+                />
+            )}
+            {done && (
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center text-white">
+                    <h2 className="text-2xl font-semibold">No more artists</h2>
+                    <p className="mt-2 text-sm text-slate-300">
+                        Check back later for new profiles.
+                    </p>
+                </div>
+            )}
         </div>
     );
 }
