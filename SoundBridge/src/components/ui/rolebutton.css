@@ -1,0 +1,17 @@
+.role-button {
+
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.role-button:hover {
+    background-color: black !important;
+    color: white !important;
+}
+
+.role-button-div {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px;
+    flex-wrap: nowrap;
+}
