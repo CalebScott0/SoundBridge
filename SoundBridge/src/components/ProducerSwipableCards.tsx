@@ -16,12 +16,12 @@ export function ProducerSwipableCards({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfiles = async () => {
+    const fetchAndRank = async () => {
       if (!currentUser) return;
       setLoading(true);
       try {
         const querySnapshot = await getDocs(collection(db, "users"));
-        const filtered = querySnapshot.docs
+        const rawProfiles = querySnapshot.docs
           .map((doc) => ({ ...doc.data(), uid: doc.id }) as AppUser)
           .filter(
             (p) =>
@@ -29,14 +29,29 @@ export function ProducerSwipableCards({
               p.role === "artist" &&
               p.uid !== currentUser.uid,
           );
-        setProfiles(filtered);
+
+        const { getBatchCompatibility } = await import("@/lib/gemini");
+        const insights = await getBatchCompatibility(currentUser, rawProfiles);
+
+        const ranked = rawProfiles
+          .map((p) => {
+            const match = insights.find((i: any) => i.uid === p.uid);
+            return {
+              ...p,
+              compatibility: match?.insight || "Potential collaborator",
+              score: match?.score || 0,
+            };
+          })
+          .sort((a, b) => (b.score || 0) - (a.score || 0));
+
+        setProfiles(ranked);
       } catch (e) {
-        console.error("Fetch error:", e);
+        console.error("Gemini/Fetch error:", e);
       } finally {
         setLoading(false);
       }
     };
-    fetchProfiles();
+    fetchAndRank();
   }, [currentUser]);
 
   if (!currentUser || loading)
