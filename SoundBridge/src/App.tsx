@@ -76,28 +76,3 @@ function App() {
 }
 
 export default App;
-
-// function App() {
-//   const [started, setStarted] = useState(false);
-
-//   // if (!started) {
-//   //   return <StarterPage onGetStarted={() => setStarted(true)} />;
-//   // }
-
-//   return (
-//     <>
-//     {/* Login */}
-
-//     <div className="min-h-svh justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-4 py-10 text-white">
-//       <div className="mx-auto max-w-6xl">
-//         {/* <SwipableCards /> */}
-        
-
-//       </div>
-//       {/* <Footer /> */}
-//     </div>
-//     </>
-//   );
-// }
-
-// export default App;
