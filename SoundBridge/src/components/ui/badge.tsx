@@ -1,6 +1,8 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+// This component is used in the dashboard to display the user's profile information and audio clip. It is also used in the EditProfile component to display the user's current profile information and audio clip.
+
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Badge({ className, ...props }: BadgeProps) {

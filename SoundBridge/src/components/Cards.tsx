@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { motion, useAnimation } from "framer-motion";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -26,14 +27,15 @@ interface TagBadgesProps {
 function TagBadges({ tags }: TagBadgesProps) {
   return (
     <div className="flex flex-wrap gap-2">
-      {tags.map((tag) => (
-        <Badge
-          key={tag}
-          className="rounded-full border border-white/20 bg-white/10 text-white"
-        >
-          {tag}
-        </Badge>
-      ))}
+      {tags &&
+        tags.map((tag) => (
+          <Badge
+            key={tag}
+            className="rounded-full border border-red-900/40 bg-black/40 text-amber-100"
+          >
+            {tag}
+          </Badge>
+        ))}
     </div>
   );
 }
@@ -44,16 +46,16 @@ interface DetailsPanelProps {
 
 function DetailsPanel({ profile }: DetailsPanelProps) {
   return (
-    <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-      <p className="text-sm text-zinc-200">{profile.bio}</p>
-      <div className="text-xs text-zinc-300">
+    <div className="space-y-3 rounded-2xl border border-red-900/40 bg-black/40 p-4">
+      <p className="text-sm text-amber-100">{profile.bio}</p>
+      <div className="text-xs text-amber-200/80">
         {profile.contact.location && (
           <p>Location: {profile.contact.location}</p>
         )}
         {profile.contact.email && <p>Email: {profile.contact.email}</p>}
         {profile.contact.phone && <p>Phone: {profile.contact.phone}</p>}
       </div>
-      <div className="text-xs text-zinc-300">
+      <div className="text-xs text-amber-200/80">
         {profile.socials.instagram && (
           <p>Instagram: {profile.socials.instagram}</p>
         )}
@@ -116,84 +118,133 @@ export function ArtistCard({
   onCollab,
 }: ArtistCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isFullMode, setIsFullMode] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    const audio = audioRef.current; // store the current audio element in a variable
-    if (!audio || !profile.audioUrl) return; // if there's no audio element or audio URL, do nothing
-
-    if (!isTop) {
-      // if this card is not the top card, ensure the audio is stopped and reset
-      audio.pause(); // pause the audio
-      audio.currentTime = 0; // set the audio back to the beginning
-      return;
-    }
-
-    audio.currentTime = 0;
-    audio.play().catch(() => undefined);
-
-    const stopAt = 12;
-    const handleTimeUpdate = () => {
-      if (audio.currentTime >= stopAt) {
-        audio.pause();
-        audio.currentTime = 0;
-      }
-    };
-
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-    return () => {
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.pause();
-      audio.currentTime = 0;
-    };
-  }, [isTop, profile.audioUrl]);
+  const swipeControls = useAnimation();
 
   const handleSwipe = (direction: "left" | "right") => {
-    if (direction === "left") {
-      onPass?.(profile);
+    if (direction === "left") onPass?.(profile);
+    else onCollab?.(profile);
+  };
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const handleTimeUpdate = () => {
+      if (!isFullMode && audio.currentTime >= 10) {
+        audio.pause();
+        audio.currentTime = 0;
+        setIsPlaying(false);
+      }
+    };
+    const handleEnd = () => setIsPlaying(false);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("ended", handleEnd);
+    return () => {
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("ended", handleEnd);
+      audio.pause();
+    };
+  }, [isFullMode]);
+
+  useEffect(() => {
+    if (!isTop && isPlaying) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    }
+  }, [isTop, isPlaying]);
+
+  const togglePlay = (full: boolean) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying && isFullMode === full) {
+      audio.pause();
+      setIsPlaying(false);
     } else {
-      onCollab?.(profile);
+      setIsFullMode(full);
+      if (isFullMode !== full) audio.currentTime = 0;
+      audio.play().catch(() => {});
+      setIsPlaying(true);
     }
   };
 
+  const triggerSwipe = (direction: "left" | "right") => {
+    swipeControls
+      .start({
+        x: direction === "left" ? -500 : 500,
+        opacity: 0,
+        transition: { duration: 0.3 },
+      })
+      .then(() => {
+        handleSwipe(direction);
+        swipeControls.set({ x: 0, opacity: 1 });
+      });
+  };
+
   return (
-    <Card
-      className="cursor-pointer border-white/10 bg-zinc-900 text-white"
-      onClick={() => setShowDetails((prev) => !prev)}
-      role="button"
-      tabIndex={0}
+    <motion.div
+      drag="x"
+      animate={swipeControls}
+      onDragEnd={(_, info) => {
+        if (Math.abs(info.offset.x) > 100)
+          triggerSwipe(info.offset.x > 0 ? "right" : "left");
+        else swipeControls.start({ x: 0 });
+      }}
+      className="touch-none"
     >
-      <CardHeader className="space-y-3">
-        <CardTitle className="text-2xl font-semibold">{profile.name}</CardTitle>
-        <Badge className="text-lg">{profile.role}</Badge>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        <div className="overflow-hidden rounded-2xl">
-          <img
-            src={profile.imageUrl}
-            alt={profile.name}
-            className="h-72 w-full object-cover"
+      <Card
+        className="cursor-pointer border-red-900/60 bg-black/50 text-amber-100"
+        onClick={() => setShowDetails(!showDetails)}
+      >
+        <CardHeader className="space-y-3">
+          <CardTitle className="text-2xl font-semibold">
+            {profile.name}
+          </CardTitle>
+          <Badge className="bg-red-950/40">{profile.role}</Badge>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="overflow-hidden rounded-2xl">
+            <img
+              src={profile.imageUrl}
+              alt={profile.name}
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay(false);
+              }}
+            >
+              {isPlaying && !isFullMode ? "Pause" : "Preview"}
+            </Button>
+            <Button
+              variant="default"
+              className="flex-1 bg-red-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay(true);
+              }}
+            >
+              {isPlaying && isFullMode ? "Pause" : "Full Clip"}
+            </Button>
+          </div>
+          <TagBadges tags={profile.genres} />
+          {showDetails && <DetailsPanel profile={profile} />}
+          <audio ref={audioRef} src={profile.audioUrl} />
+        </CardContent>
+        <CardFooter className="flex flex-col gap-4">
+          <CompatibilityBadge label={profile.compatibility} />
+          <ActionButtons
+            onPass={() => triggerSwipe("left")}
+            onCollab={() => triggerSwipe("right")}
           />
-        </div>
-
-        <TagBadges tags={profile.genres} />
-
-        {showDetails && <DetailsPanel profile={profile} />}
-
-        <audio ref={audioRef} src={profile.audioUrl} />
-      </CardContent>
-
-      <CardFooter className="flex flex-col items-start gap-4">
-        {/* Compatibility Badge */}
-        <CompatibilityBadge label={profile.compatibility} />
-
-        {/* Button Container - Added w-full to fill the card */}
-        <ActionButtons
-          onPass={() => handleSwipe("left")}
-          onCollab={() => handleSwipe("right")}
-        />
-      </CardFooter>
-    </Card>
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
 }

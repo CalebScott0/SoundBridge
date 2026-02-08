@@ -7,6 +7,7 @@ npm install firebase react-router-dom
 npm install -D sass
 npm install tailwindcss @tailwindcss/vite
 npm install -D @types/node
+npm install @google/generative-ai
 
 npm run dev
 ```
